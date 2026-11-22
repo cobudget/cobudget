@@ -11,7 +11,11 @@ import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 import { FormattedMessage, useIntl } from "react-intl";
 import Tooltip from "@tippyjs/react";
-import { MAX_IMPORT_KEY_LENGTH, validateImportKey } from "utils/fieldKey";
+import {
+  MAX_IMPORT_KEY_LENGTH,
+  generateImportKey,
+  validateImportKey,
+} from "utils/fieldKey";
 
 const ADD_CUSTOM_FIELD_MUTATION = gql`
   mutation AddCustomField($roundId: ID!, $customField: CustomFieldInput!) {
@@ -110,7 +114,7 @@ export default function AddOrEditCustomField({
     editing ? EDIT_CUSTOM_FIELD_MUTATION : ADD_CUSTOM_FIELD_MUTATION
   );
 
-  const { control, handleSubmit, register, errors } = useForm({
+  const { control, handleSubmit, register, errors, watch } = useForm({
     resolver: yupResolver(schema),
   });
 
@@ -128,7 +132,18 @@ export default function AddOrEditCustomField({
     (f) => f.id !== customField.id
   );
   const currentUnique = otherFields.find((f) => f.isUniqueIdentifier);
-  const importKeyError = keyError(importKey, otherFields);
+  // New field: the column key follows the name as it is typed, until the admin
+  // edits the key by hand. Existing field: the key is stable (a rename keeps it).
+  const [keyEdited, setKeyEdited] = useState(false);
+  const nameValue = watch("customField.name") ?? customField.name ?? "";
+  const suggestedKey = nameValue.trim()
+    ? generateImportKey(
+        nameValue,
+        otherFields.map((f) => f.importKey)
+      )
+    : "";
+  const keyValue = editing || keyEdited ? importKey : suggestedKey;
+  const importKeyError = keyError(keyValue, otherFields);
   const intl = useIntl();
 
   return (
@@ -150,7 +165,7 @@ export default function AddOrEditCustomField({
           onSubmit={handleSubmit((variables) => {
             if (importKeyError) return;
             variables.customField.isRequired = isRequired;
-            variables.customField.importKey = importKey.trim() || null;
+            variables.customField.importKey = keyValue.trim() || null;
             variables.customField.isUniqueIdentifier =
               typeInputValue === "TEXT" && isUniqueIdentifier;
             variables.customField.options =
@@ -285,50 +300,13 @@ export default function AddOrEditCustomField({
                 inputRef={register}
               />
             </div>
-            {typeInputValue === "TEXT" && (
-              <div>
-                {/* A disabled checkbox gets no mouse/touch events, so the
-                    tooltip hangs on the wrapper: hover on desktop, tap on
-                    touch screens. */}
-                <Tooltip
-                  content={intl.formatMessage(
-                    {
-                      defaultMessage:
-                        '"{name}" is already the unique identifier of this round.',
-                    },
-                    { name: currentUnique?.name }
-                  )}
-                  placement="bottom-start"
-                  arrow={false}
-                  disabled={!currentUnique}
-                >
-                  <span className="inline-block">
-                    <FormControlLabel
-                      label={intl.formatMessage({
-                        defaultMessage: "Unique identifier (for imports)",
-                      })}
-                      control={
-                        <Checkbox
-                          onChange={(e) =>
-                            setIsUniqueIdentifier(e.target.checked)
-                          }
-                          checked={isUniqueIdentifier}
-                          disabled={Boolean(currentUnique)}
-                          data-testid="customfield-unique-checkbox"
-                        />
-                      }
-                    />
-                  </span>
-                </Tooltip>
-                <p className="text-sm text-gray-600">
-                  <FormattedMessage defaultMessage="Used only by the CSV import: its value must be unique across the file and the round, and becomes a tag. Normal editing is not affected." />
-                </p>
-              </div>
-            )}
             <div>
               <TextField
+                label={intl.formatMessage({
+                  defaultMessage: "CSV import column",
+                })}
                 placeholder={intl.formatMessage({
-                  defaultMessage: "Import key (CSV column name)",
+                  defaultMessage: "Generated from the name",
                 })}
                 color={round.color}
                 error={Boolean(importKeyError)}
@@ -337,17 +315,60 @@ export default function AddOrEditCustomField({
                   intl.formatMessage(
                     {
                       defaultMessage:
-                        "Column name in the import CSV. Empty = generated from the name. Stays the same when you rename the item. Max {max} characters.",
+                        "Column name in the import file. Max {max} characters.",
                     },
                     { max: MAX_IMPORT_KEY_LENGTH }
                   )
                 }
                 inputProps={{
-                  value: importKey,
-                  onChange: (e) => setImportKey(e.target.value),
+                  value: keyValue,
+                  onChange: (e) => {
+                    setKeyEdited(true);
+                    setImportKey(e.target.value);
+                  },
                 }}
                 testid="customfield-importkey-input"
               />
+              {typeInputValue === "TEXT" && (
+                <div className="mt-2">
+                  {/* A disabled checkbox gets no mouse/touch events, so the
+                      tooltip hangs on the wrapper: hover on desktop, tap on
+                      touch screens. */}
+                  <Tooltip
+                    content={intl.formatMessage(
+                      {
+                        defaultMessage:
+                          '"{name}" is already the unique identifier of this round.',
+                      },
+                      { name: currentUnique?.name }
+                    )}
+                    placement="bottom-start"
+                    arrow={false}
+                    disabled={!currentUnique}
+                  >
+                    <span className="inline-block">
+                      <FormControlLabel
+                        label={intl.formatMessage({
+                          defaultMessage: "Unique entry identifier",
+                        })}
+                        control={
+                          <Checkbox
+                            onChange={(e) =>
+                              setIsUniqueIdentifier(e.target.checked)
+                            }
+                            checked={isUniqueIdentifier}
+                            disabled={Boolean(currentUnique)}
+                            data-testid="customfield-unique-checkbox"
+                          />
+                        }
+                      />
+                    </span>
+                  </Tooltip>
+                  <p className="text-sm text-gray-600">
+                    <FormattedMessage defaultMessage="Each imported entry needs a different value here; it also becomes a tag." />
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
