@@ -470,12 +470,14 @@ const BucketImport = ({ round }: { round: any }) => {
                   warnings, so you can fix them and assign an image to each
                   bucket before anything is created.
                 </p>
-                <Button
-                  disabled={!ctx}
-                  onClick={() => fileRef.current?.click()}
-                >
-                  Choose CSV file
-                </Button>
+                <div className="flex justify-center">
+                  <Button
+                    disabled={!ctx}
+                    onClick={() => fileRef.current?.click()}
+                  >
+                    Choose CSV file
+                  </Button>
+                </div>
               </>
             )}
           </div>
