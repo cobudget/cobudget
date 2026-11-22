@@ -1,19 +1,30 @@
 import type { Prepared } from "utils/bucketImport/prepareImport";
 import type { ImportColumn } from "utils/bucketImport/columns";
 
-const ITEM_REM = 2.75; // fixed item height, so the panel can show 1.5 items
-
 type Item = {
   key: string;
   severity: "error" | "warning";
-  rowNumber: number;
+  rowNumber: number | null;
+  rowTitle: string;
   column: string | null;
-  where: string;
+  field: string;
   message: string;
 };
 
-// Everything that needs a decision, errors first. The same "No image yet."
-// warning on every row would drown the list, so it is one grouped entry.
+const ErrorIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+    <path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" />
+  </svg>
+);
+const WarningIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+  </svg>
+);
+
+// The list view: every error, then every warning, each linked to its row
+// (number and title) and field. The same "No image yet." warning on every row
+// would drown the list, so it is one grouped entry.
 const IssuesList = ({
   prepared,
   columns,
@@ -23,7 +34,7 @@ const IssuesList = ({
   columns: ImportColumn[];
   onOpen: (rowNumber: number, column: string | null) => void;
 }) => {
-  const title = (col: string | null) => {
+  const fieldName = (col: string | null) => {
     if (!col) return "";
     if (col === "image") return "Image";
     if (col.startsWith("budget-")) return "Budget";
@@ -51,8 +62,9 @@ const IssuesList = ({
         key: `${r.rowNumber}-${k}`,
         severity: i.severity === "error" ? "error" : "warning",
         rowNumber: r.rowNumber,
+        rowTitle: r.payload.title,
         column: i.column,
-        where: `Row ${r.rowNumber}${i.column ? ` · ${title(i.column)}` : ""}`,
+        field: fieldName(i.column),
         message: i.message,
       });
     });
@@ -66,53 +78,61 @@ const IssuesList = ({
       key: "no-image",
       severity: "warning",
       rowNumber: noImageFirst,
+      rowTitle: "",
       column: "image",
-      where: "Images",
+      field: "Images",
       message:
         noImageCount === 1
           ? "1 row has no image yet."
           : `${noImageCount} rows have no image yet.`,
     });
   }
-  if (!items.length) return null;
 
-  const errors = items.filter((i) => i.severity === "error").length;
-  const warnings = items.length - errors;
+  if (!items.length)
+    return (
+      <p className="text-sm text-green-800 bg-green-50 rounded px-4 py-3">
+        Nothing to review: every row is ready.
+      </p>
+    );
+
   return (
     <div>
-      <div className="text-sm mb-1">
-        <span className="font-medium">To review</span>
-        <span className="text-gray-600">
-          {" "}
-          · {errors} {errors === 1 ? "error" : "errors"}, {warnings}{" "}
-          {warnings === 1 ? "warning" : "warnings"}. Select one to open it in
-          the editor.
-        </span>
-      </div>
-      <div
-        className="overflow-y-auto border border-gray-300 rounded"
-        style={{ maxHeight: `${ITEM_REM * 1.5}rem` }}
-      >
-        {items.map((i) => (
-          <button
-            key={i.key}
-            type="button"
-            style={{ height: `${ITEM_REM}rem` }}
-            className="w-full flex items-center gap-2 px-3 text-left text-sm border-b border-gray-200 last:border-b-0 hover:bg-gray-50"
-            title={`${i.where}: ${i.message}`}
-            onClick={() => onOpen(i.rowNumber, i.column)}
-          >
-            <span
-              className={`flex-none font-medium ${
-                i.severity === "error" ? "text-red-700" : "text-yellow-800"
+      <p className="text-sm text-gray-600 mb-2">
+        Select an item to open it in the editor below.
+      </p>
+      <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "28rem" }}>
+        {items.map((i) => {
+          const isError = i.severity === "error";
+          return (
+            <button
+              key={i.key}
+              type="button"
+              onClick={() =>
+                i.rowNumber !== null && onOpen(i.rowNumber, i.column)
+              }
+              className={`w-full flex items-start gap-3 text-left rounded-b border-t-3 px-4 py-2 shadow-sm focus:outline-none focus:ring ${
+                isError
+                  ? "bg-red-100 border-red-500 text-red-900 hover:bg-red-200"
+                  : "bg-yellow-100 border-yellow-500 text-yellow-900 hover:bg-yellow-200"
               }`}
             >
-              {i.severity === "error" ? "✕" : "!"}
-            </span>
-            <span className="flex-none font-medium">{i.where}</span>
-            <span className="truncate text-gray-800">{i.message}</span>
-          </button>
-        ))}
+              <span className="flex-none pt-0.5">
+                {isError ? <ErrorIcon /> : <WarningIcon />}
+                <span className="sr-only">{isError ? "Error" : "Warning"}</span>
+              </span>
+              <span className="min-w-0">
+                <span className="block font-bold text-sm">
+                  {i.field === "Images"
+                    ? "Images"
+                    : [`Row ${i.rowNumber}`, i.rowTitle, i.field]
+                        .filter(Boolean)
+                        .join(" · ")}
+                </span>
+                <span className="block text-sm">{i.message}</span>
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

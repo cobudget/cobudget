@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { gql, useMutation, useQuery } from "urql";
 import toast from "react-hot-toast";
 import Button from "components/Button";
@@ -31,6 +32,7 @@ import ImportResult from "./ImportResult";
 import IssuesList from "./IssuesList";
 import PreviewTable from "./PreviewTable";
 import RowEditor from "./RowEditor";
+import SegmentedToggle from "./SegmentedToggle";
 import type { FocusRequest } from "./RowEditor";
 
 const IMPORT_CONTEXT_QUERY = gql`
@@ -115,6 +117,7 @@ const BucketImport = ({ round }: { round: any }) => {
   const [selected, setSelected] = useState<number | null>(null);
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [showBatch, setShowBatch] = useState(false);
+  const [view, setView] = useState<"table" | "list">("table");
   const [onlyIssueFields, setOnlyIssueFields] = useState(true);
   const [focusReq, setFocusReq] = useState<FocusRequest | null>(null);
   const [ackWarnings, setAckWarnings] = useState(false);
@@ -158,6 +161,32 @@ const BucketImport = ({ round }: { round: any }) => {
     [preparedBase, images]
   );
   const summary = prepared ? summarize(prepared) : null;
+
+  // Unsaved work: a file is loaded and nothing has been imported yet. Leaving
+  // the page (close, reload, back, or a link inside the app) asks first.
+  const router = useRouter();
+  const dirty = rows.length > 0 && !created;
+  useEffect(() => {
+    if (!dirty) return;
+    const message =
+      "You have an import in progress that has not been submitted. Leave this page and lose it?";
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = ""; // browsers show their own standard text
+    };
+    const onRouteChange = () => {
+      if (window.confirm(message)) return;
+      router.events.emit("routeChangeError");
+      // eslint-disable-next-line no-throw-literal
+      throw "Route change aborted: unsaved import.";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    router.events.on("routeChangeStart", onRouteChange);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      router.events.off("routeChangeStart", onRouteChange);
+    };
+  }, [dirty, router]);
 
   const uniqueName =
     ctx?.fields.find((f) => f.isUniqueIdentifier)?.name ?? "identifier";
@@ -417,37 +446,36 @@ const BucketImport = ({ round }: { round: any }) => {
         </Banner>
       )}
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-3">Upload CSV</h2>
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".csv,text/csv"
-          className="hidden"
-          onChange={(e) => {
-            onFile(e.target.files?.[0]);
-            e.target.value = ""; // allow re-selecting the same file
-          }}
-        />
-        <Button disabled={!ctx} onClick={() => fileRef.current?.click()}>
-          {headers.length ? "Choose another file" : "Choose CSV file"}
-        </Button>
-        {fileName && (
-          <span className="ml-3 text-sm text-gray-700">{fileName}</span>
-        )}
-      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".csv,text/csv"
+        className="hidden"
+        onChange={(e) => {
+          onFile(e.target.files?.[0]);
+          e.target.value = ""; // allow re-selecting the same file
+        }}
+      />
 
       {!(prepared && summary && ctx) && (
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-lg font-semibold mb-3">Preview</h2>
-          <div className="border-2 border-dashed rounded-lg p-10 text-center text-gray-500 text-sm">
+          <div className="border-2 border-dashed rounded-lg p-10 text-center text-gray-600 text-sm space-y-4">
             {parsing ? (
-              "Reading your file…"
+              <p>Reading your file…</p>
             ) : (
               <>
-                Choose a CSV file above. Your rows appear here, with errors and
-                warnings, so you can fix them and assign an image to each bucket
-                before anything is created.
+                <p>
+                  Choose a CSV file. Your rows appear here, with errors and
+                  warnings, so you can fix them and assign an image to each
+                  bucket before anything is created.
+                </p>
+                <Button
+                  disabled={!ctx}
+                  onClick={() => fileRef.current?.click()}
+                >
+                  Choose CSV file
+                </Button>
               </>
             )}
           </div>
@@ -456,6 +484,20 @@ const BucketImport = ({ round }: { round: any }) => {
 
       {prepared && summary && ctx && (
         <div className="bg-white rounded-lg shadow p-6 mb-6 space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold">
+              Preview
+              {fileName && (
+                <span className="ml-2 text-sm font-normal text-gray-600">
+                  {fileName}
+                </span>
+              )}
+            </h2>
+            <p className="text-sm text-gray-600">
+              This is a preview: nothing has been created yet. Buckets are
+              created only when you submit at the bottom.
+            </p>
+          </div>
           {prepared.fileIssues.map((i, k) => (
             <Banner
               key={k}
@@ -471,29 +513,16 @@ const BucketImport = ({ round }: { round: any }) => {
             </Banner>
           ))}
 
-          {summary.duplicateCodeRows > 0 && (
-            <Banner
-              variant="critical"
-              title={`${summary.duplicateCodeRows} rows share the same ${uniqueName}`}
-              className=""
-            >
-              Every row with a repeated value is highlighted. Edit the values or
-              remove rows until each one is unique.
-            </Banner>
-          )}
           {summary.existingCodeRows > 0 && (
-            <Banner
-              variant="critical"
-              title={`${summary.existingCodeRows} rows already exist in this round`}
-              className=""
-            >
-              <div className="flex items-center gap-3 flex-wrap">
-                <span>Their {uniqueName} values are already used here.</span>
-                <Button variant="secondary" onClick={removeExisting}>
-                  Remove rows that already exist
-                </Button>
-              </div>
-            </Banner>
+            <div className="flex items-center gap-3 flex-wrap text-sm bg-red-100 border-l-4 border-red-500 text-red-900 rounded-r px-4 py-2">
+              <span>
+                {summary.existingCodeRows} rows already exist in this round
+                (their {uniqueName} is already used here).
+              </span>
+              <Button variant="secondary" onClick={removeExisting}>
+                Remove rows that already exist
+              </Button>
+            </div>
           )}
 
           <div className="flex flex-wrap gap-3 items-stretch">
@@ -520,22 +549,18 @@ const BucketImport = ({ round }: { round: any }) => {
               >
                 {showBatch ? "Hide batch image upload" : "Batch image upload"}
               </Button>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={onlyNeedsAttention}
-                  onChange={(e) => setOnlyNeedsAttention(e.target.checked)}
-                />
-                Show only rows that need attention
-              </label>
+              {view === "table" && (
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={onlyNeedsAttention}
+                    onChange={(e) => setOnlyNeedsAttention(e.target.checked)}
+                  />
+                  Show only rows that need attention
+                </label>
+              )}
             </div>
           </div>
-
-          <IssuesList
-            prepared={prepared}
-            columns={columns}
-            onOpen={(rowNumber, column) => openRow(rowNumber, column)}
-          />
 
           {showBatch && (
             <BatchImages
@@ -556,19 +581,68 @@ const BucketImport = ({ round }: { round: any }) => {
             />
           )}
 
-          <PreviewTable
-            prepared={prepared}
-            currency={ctx.currency}
-            columns={columns}
-            hasColumn={hasColumn}
-            onlyNeedsAttention={onlyNeedsAttention}
-            selected={selected}
-            onEditCell={(rowNumber, column) => openRow(rowNumber, column)}
-            onSelectRow={(rowNumber) => openRow(rowNumber, undefined)}
-            images={images}
-            onAttachImage={attachImage}
-            onClearImage={clearImage}
-          />
+          <div className="flex justify-end">
+            <SegmentedToggle<"table" | "list">
+              label="View"
+              color={round.color}
+              value={view}
+              onChange={setView}
+              options={[
+                {
+                  value: "table",
+                  label: "Table",
+                  iconOnlyOnMobile: true,
+                  icon: (
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                    >
+                      <path d="M3 3h18v18H3V3zm2 2v4h14V5H5zm0 6v3h4v-3H5zm6 0v3h8v-3h-8zM5 16v3h4v-3H5zm6 0v3h8v-3h-8z" />
+                    </svg>
+                  ),
+                },
+                {
+                  value: "list",
+                  label: "List",
+                  iconOnlyOnMobile: true,
+                  icon: (
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                    >
+                      <path d="M3 5h2v2H3V5zm4 0h14v2H7V5zM3 11h2v2H3v-2zm4 0h14v2H7v-2zM3 17h2v2H3v-2zm4 0h14v2H7v-2z" />
+                    </svg>
+                  ),
+                },
+              ]}
+            />
+          </div>
+
+          {view === "table" ? (
+            <PreviewTable
+              prepared={prepared}
+              currency={ctx.currency}
+              columns={columns}
+              hasColumn={hasColumn}
+              onlyNeedsAttention={onlyNeedsAttention}
+              selected={selected}
+              onEditCell={(rowNumber, column) => openRow(rowNumber, column)}
+              onSelectRow={(rowNumber) => openRow(rowNumber, undefined)}
+              images={images}
+              onAttachImage={attachImage}
+              onClearImage={clearImage}
+            />
+          ) : (
+            <IssuesList
+              prepared={prepared}
+              columns={columns}
+              onOpen={(rowNumber, column) => openRow(rowNumber, column)}
+            />
+          )}
 
           <div className="border rounded p-4 space-y-4">
             {selectedRow ? (
@@ -579,31 +653,31 @@ const BucketImport = ({ round }: { round: any }) => {
                     {selectedRow.payload.title || "(no title)"}
                   </h3>
                   <div className="flex items-center gap-3">
-                    <div
-                      role="group"
-                      aria-label="Edit or preview"
-                      className="inline-flex rounded overflow-hidden border border-gray-300 text-sm"
-                    >
-                      {(["edit", "preview"] as const).map((m) => (
-                        <button
-                          key={m}
-                          type="button"
-                          aria-pressed={mode === m}
-                          className={`px-3 py-1 ${
-                            mode === m ? "bg-gray-900 text-white" : "bg-white"
-                          }`}
-                          onClick={() => setMode(m)}
-                        >
-                          {m === "edit" ? "Edit" : "Preview"}
-                        </button>
-                      ))}
-                    </div>
+                    <SegmentedToggle<"edit" | "preview">
+                      label="Edit or preview"
+                      color={round.color}
+                      value={mode}
+                      onChange={setMode}
+                      options={[
+                        { value: "edit", label: "Edit" },
+                        { value: "preview", label: "Preview" },
+                      ]}
+                    />
                     <button
                       type="button"
-                      className="text-sm text-gray-600"
+                      aria-label="Close"
+                      title="Close"
+                      className="ml-1 p-1.5 rounded text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring"
                       onClick={() => setSelected(null)}
                     >
-                      Close
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="18"
+                        height="18"
+                        fill="currentColor"
+                      >
+                        <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -638,7 +712,10 @@ const BucketImport = ({ round }: { round: any }) => {
             )}
           </div>
 
-          <div className="border-t pt-4 space-y-2 text-sm">
+          <div
+            className="sticky bottom-0 z-20 -mx-6 -mb-6 px-6 pb-6 pt-4 bg-white border-t rounded-b-lg space-y-2 text-sm"
+            style={{ boxShadow: "0 -6px 8px -6px rgba(0,0,0,0.15)" }}
+          >
             {summary.blocked ? (
               <p className="text-red-700">
                 Importing is blocked while there are errors
