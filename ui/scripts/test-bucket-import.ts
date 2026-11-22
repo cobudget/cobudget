@@ -278,6 +278,15 @@ C,s,C1,Green Economy,Beds,100
     ); // trailing empty lines are fine
   });
 
+  await test("no budget items: the warning is on the budget cell", async () => {
+    const p = await run(
+      "title,summary,ref,budget-item-1,budget-amount-1\nT,S,A1,,\n"
+    );
+    const w = p.rows[0].issues.find((i) => i.message.startsWith("No budget"));
+    assert.equal(w?.column, "budget-item-1");
+    assert.equal(w?.severity, "warning");
+  });
+
   await test("seeded bad data: each message lands on the right cell/row", async () => {
     const p = await run(
       [

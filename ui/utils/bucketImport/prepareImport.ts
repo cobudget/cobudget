@@ -282,6 +282,10 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
       return columns.find((c) => c.field?.id === x.fieldId)?.column ?? null;
     if (x.field === "title") return colOf("title") ?? null;
     if (x.field === "summary") return colOf("summary") ?? null;
+    // budget rules (no items, too many, ...) belong to the budget cell: the
+    // first budget column is where the editor starts
+    if (x.field.startsWith("budgetItems") && budgetNumbers.length)
+      return `budget-item-${budgetNumbers[0]}`;
     return null;
   };
   const seenFile = new Set(fileIssues.map((f) => f.message));
