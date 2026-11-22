@@ -1,8 +1,9 @@
 import { useRef } from "react";
 import type { RowImage } from "utils/bucketImport/images";
 
-// Thumbnail + upload / replace / clear for one row. `thumb` is whatever image
-// the row will import with (uploaded file or a valid image_url cell).
+// Thumbnail + add / replace / clear for one entry. `thumb` is the local
+// preview of the chosen file (nothing is uploaded until the import is
+// submitted).
 const ImageControl = ({
   thumb,
   image,
@@ -47,7 +48,7 @@ const ImageControl = ({
             disabled={uploading}
             onClick={() => ref.current?.click()}
           >
-            {image?.status === "done" ? "Replace" : "Upload image"}
+            {image ? "Replace" : "+ Add image"}
           </button>
           {image && !uploading && (
             <button
@@ -55,12 +56,12 @@ const ImageControl = ({
               className="underline text-gray-700"
               onClick={onClear}
             >
-              {image.status === "error" ? "Dismiss" : "Clear"}
+              Clear
             </button>
           )}
         </div>
         {uploading && <div className="text-gray-600">Uploading…</div>}
-        {image?.status === "done" && (
+        {image && !uploading && (
           <div
             className="text-gray-600 truncate max-w-40"
             title={image.fileName}
@@ -70,7 +71,7 @@ const ImageControl = ({
         )}
         {image?.status === "error" && (
           <div className="text-red-700">
-            Upload failed ({image.fileName}): {image.error}
+            Upload failed: {image.error}. It is retried when you submit.
           </div>
         )}
       </div>

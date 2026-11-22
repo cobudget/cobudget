@@ -22,12 +22,16 @@ import type { ImportFieldDef } from "utils/bucketImport/types";
 import { applyImages } from "utils/bucketImport/images";
 import type { RowImage, RowImages } from "utils/bucketImport/images";
 import { uploadBucketImage } from "utils/uploadBucketImage";
-import { createLimiter, matchFiles } from "utils/bucketImport/matchImages";
-import BatchImages from "./BatchImages";
-import type { UnassignedFile } from "./BatchImages";
+import {
+  createLimiter,
+  matchFiles,
+  placeInOrder,
+} from "utils/bucketImport/matchImages";
 import BucketPreview from "./BucketPreview";
 import ColumnReference from "./ColumnReference";
 import ConfirmModal from "./ConfirmModal";
+import type { UploadFailure } from "./ConfirmModal";
+import HelpPopover from "./HelpPopover";
 import ImportResult from "./ImportResult";
 import IssuesList from "./IssuesList";
 import PreviewTable from "./PreviewTable";
@@ -116,7 +120,6 @@ const BucketImport = ({ round }: { round: any }) => {
   const [onlyNeedsAttention, setOnlyNeedsAttention] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const [mode, setMode] = useState<"edit" | "preview">("edit");
-  const [showBatch, setShowBatch] = useState(false);
   const [view, setView] = useState<"table" | "list">("table");
   const [onlyIssueFields, setOnlyIssueFields] = useState(true);
   const [focusReq, setFocusReq] = useState<FocusRequest | null>(null);
@@ -131,10 +134,13 @@ const BucketImport = ({ round }: { round: any }) => {
   const submittingRef = useRef(false); // synchronous double-click guard
 
   const [images, setImages] = useState<RowImages>({});
-  const attemptRef = useRef(0);
-  const limitRef = useRef(createLimiter(3)); // at most 3 uploads in flight
+  const imagesRef = useRef<RowImages>({});
+  imagesRef.current = images;
+  const batchRef = useRef<HTMLInputElement>(null);
   const batchIdRef = useRef(0);
-  const [unassigned, setUnassigned] = useState<UnassignedFile[]>([]);
+  const [phase, setPhase] = useState<"idle" | "images" | "import">("idle");
+  const [progress, setProgress] = useState({ done: 0, total: 0 });
+  const [uploadFailures, setUploadFailures] = useState<UploadFailure[]>([]);
 
   const preparedBase: Prepared | null = useMemo(
     () =>
@@ -208,7 +214,6 @@ const BucketImport = ({ round }: { round: any }) => {
       setHeaders(parsed.headers);
       setRows(parsed.rows.map((cells, i) => ({ id: i + 1, cells })));
       setImages({}); // row ids restart at 1 for a new file
-      setUnassigned([]);
       setSelected(null);
       setAckWarnings(false);
     } catch (e) {
@@ -235,32 +240,25 @@ const BucketImport = ({ round }: { round: any }) => {
     [headers]
   );
 
-  // Uploads start immediately. A later attach/clear on the same row replaces
-  // or removes its entry, so a stale upload result is dropped (attempt check).
-  const attachImage = useCallback(async (id: number, file: File) => {
-    const attempt = ++attemptRef.current;
+  // Choosing an image only keeps the file (shown through a local preview);
+  // the upload happens when the import is submitted.
+  const attachImage = useCallback((id: number, file: File) => {
+    const old = imagesRef.current[id];
+    if (old) URL.revokeObjectURL(old.previewUrl);
     setImages((m) => ({
       ...m,
-      [id]: { status: "uploading", fileName: file.name, attempt },
-    }));
-    let next: RowImage;
-    try {
-      const { small, large } = await limitRef.current(() =>
-        uploadBucketImage(file)
-      );
-      next = { status: "done", fileName: file.name, attempt, small, large };
-    } catch (e) {
-      next = {
-        status: "error",
+      [id]: {
+        status: "pending",
         fileName: file.name,
-        attempt,
-        error: e?.message ?? String(e),
-      };
-    }
-    setImages((m) => (m[id]?.attempt === attempt ? { ...m, [id]: next } : m));
+        file,
+        previewUrl: URL.createObjectURL(file),
+      },
+    }));
   }, []);
 
   const clearImage = useCallback((id: number) => {
+    const old = imagesRef.current[id];
+    if (old) URL.revokeObjectURL(old.previewUrl);
     setImages((m) => {
       const rest = { ...m };
       delete rest[id];
@@ -268,21 +266,15 @@ const BucketImport = ({ round }: { round: any }) => {
     });
   }, []);
 
-  const moveImage = useCallback((from: number, to: number) => {
-    setImages((m) => {
-      if (m[from]?.status !== "done" || m[to]) return m;
-      const rest = { ...m };
-      delete rest[from];
-      return { ...rest, [to]: m[from] };
-    });
-  }, []);
-
+  // Batch: match by name (unique value, title, number); the files that cannot
+  // be matched fill the entries that still have no image, in order.
   const onBatchFiles = (files: File[]) => {
     if (!preparedBase || files.length === 0) return;
     const entries = files.map((file) => ({
       id: `f${++batchIdRef.current}`,
       file,
     }));
+    const hasImage = new Set(Object.keys(images).map(Number));
     const result = matchFiles(
       entries.map((e) => ({ id: e.id, name: e.file.name })),
       preparedBase.rows.map((r) => ({
@@ -290,36 +282,31 @@ const BucketImport = ({ round }: { round: any }) => {
         uniqueValue: r.uniqueValue,
         title: r.payload.title,
       })),
-      new Set(
-        Object.keys(images)
-          .map(Number)
-          .filter((n) => images[n].status !== "error")
-      )
+      hasImage
     );
     const fileOf = (id: string) => entries.find((e) => e.id === id).file;
     result.assigned.forEach((a) => attachImage(a.rowNumber, fileOf(a.fileId)));
-    setUnassigned((u) => [
-      ...u,
-      ...result.unmatched.map((id) => ({
-        id,
-        file: fileOf(id),
-        reason: "unmatched" as const,
-        candidates: [] as number[],
-      })),
-      ...result.ambiguous.map((a) => ({
-        id: a.fileId,
-        file: fileOf(a.fileId),
-        reason: a.reason,
-        candidates: a.candidates,
-      })),
-    ]);
-  };
 
-  const assignUnassigned = (id: string, rowNumber: number) => {
-    const u = unassigned.find((x) => x.id === id);
-    if (!u) return;
-    setUnassigned((us) => us.filter((x) => x.id !== id));
-    attachImage(rowNumber, u.file);
+    const taken = new Set(hasImage);
+    result.assigned.forEach((a) => taken.add(a.rowNumber));
+    const order = (id: string) => entries.findIndex((e) => e.id === id);
+    const unplaced = [
+      ...result.unmatched,
+      ...result.ambiguous.map((x) => x.fileId),
+    ].sort((x, y) => order(x) - order(y));
+    const { placed, leftover } = placeInOrder(
+      unplaced,
+      preparedBase.rows.map((r) => r.rowNumber).filter((n) => !taken.has(n))
+    );
+    placed.forEach((x) => attachImage(x.rowNumber, fileOf(x.fileId)));
+
+    const byName = result.assigned.length;
+    toast.success(
+      `${byName} matched by name, ${placed.length} placed in order` +
+        (leftover.length
+          ? `; ${leftover.length} not used (no entry without an image left).`
+          : ".")
+    );
   };
 
   const onRemove = useCallback(
@@ -395,10 +382,69 @@ const BucketImport = ({ round }: { round: any }) => {
     submittingRef.current = true;
     setSubmitting(true);
     setSubmitError(null);
+    setUploadFailures([]);
     try {
+      // 1. upload the chosen images (a few in parallel). Nothing is created
+      //    until every one is up, so a failure leaves the round untouched.
+      const uploaded: Record<number, { small: string; large: string }> = {};
+      const todo: { rowNumber: number; title: string; image: RowImage }[] = [];
+      for (const r of prepared.rows) {
+        const img = images[r.rowNumber];
+        if (!img) continue;
+        if (img.status === "done" && img.small && img.large)
+          uploaded[r.rowNumber] = { small: img.small, large: img.large };
+        else
+          todo.push({
+            rowNumber: r.rowNumber,
+            title: r.payload.title,
+            image: img,
+          });
+      }
+      if (todo.length) {
+        setPhase("images");
+        setProgress({ done: 0, total: todo.length });
+        const limit = createLimiter(4);
+        const failures: UploadFailure[] = [];
+        const mark = (n: number, patch: Partial<RowImage>) =>
+          setImages((m) => (m[n] ? { ...m, [n]: { ...m[n], ...patch } } : m));
+        await Promise.all(
+          todo.map((t) =>
+            limit(async () => {
+              mark(t.rowNumber, { status: "uploading" });
+              try {
+                const u = await uploadBucketImage(t.image.file);
+                uploaded[t.rowNumber] = u;
+                mark(t.rowNumber, { status: "done", ...u, error: undefined });
+              } catch (e) {
+                const message = e?.message ?? String(e);
+                failures.push({
+                  rowNumber: t.rowNumber,
+                  title: t.title,
+                  fileName: t.image.fileName,
+                  message,
+                });
+                mark(t.rowNumber, { status: "error", error: message });
+              } finally {
+                setProgress((p) => ({ ...p, done: p.done + 1 }));
+              }
+            })
+          )
+        );
+        if (failures.length) {
+          setUploadFailures(failures.sort((x, y) => x.rowNumber - y.rowNumber));
+          return;
+        }
+      }
+
+      // 2. create all the buckets in one all-or-nothing request
+      setPhase("import");
       const res = await importBuckets({
         roundId: round.id,
-        buckets: prepared.rows.map((r) => r.payload),
+        buckets: prepared.rows.map((r) =>
+          uploaded[r.rowNumber]
+            ? { ...r.payload, images: [uploaded[r.rowNumber]] }
+            : r.payload
+        ),
       });
       if (res.error) {
         // Nothing was written (single all-or-nothing transaction). Refresh the
@@ -412,8 +458,10 @@ const BucketImport = ({ round }: { round: any }) => {
       setCreated(res.data.importBuckets.buckets);
       setConfirmOpen(false);
       setRows([]);
+      Object.values(imagesRef.current).forEach((i) =>
+        URL.revokeObjectURL(i.previewUrl)
+      );
       setImages({});
-      setUnassigned([]);
       setHeaders([]);
       setSelected(null);
     } catch (e) {
@@ -421,6 +469,7 @@ const BucketImport = ({ round }: { round: any }) => {
     } finally {
       submittingRef.current = false;
       setSubmitting(false);
+      setPhase("idle");
     }
   };
 
@@ -557,12 +606,45 @@ const BucketImport = ({ round }: { round: any }) => {
               className="bg-red-100 text-red-900"
             />
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 ml-auto">
-              <Button
-                variant="secondary"
-                onClick={() => setShowBatch((v) => !v)}
-              >
-                {showBatch ? "Hide batch image upload" : "Batch image upload"}
-              </Button>
+              <input
+                ref={batchRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  onBatchFiles(Array.from(e.target.files ?? []));
+                  e.target.value = "";
+                }}
+              />
+              <span className="inline-flex items-center gap-1">
+                <Button
+                  variant="secondary"
+                  onClick={() => batchRef.current?.click()}
+                >
+                  Batch image upload
+                </Button>
+                <HelpPopover label="How the batch image upload works">
+                  <p>Choose many images at once.</p>
+                  <p>
+                    Each image is matched to an entry by its file name, without
+                    the extension: first the {uniqueName} (for example{" "}
+                    <span className="font-mono">GF01.jpg</span>), then the title
+                    (<span className="font-mono">community-garden.png</span>
+                    ), then the entry number (
+                    <span className="font-mono">7.jpg</span>).
+                  </p>
+                  <p>
+                    Images that cannot be matched are placed, in order, on the
+                    entries that still have no image. Any extra images are not
+                    used.
+                  </p>
+                  <p>
+                    Images stay on your computer until you submit the import.
+                    You can change any entry&apos;s image later in its editor.
+                  </p>
+                </HelpPopover>
+              </span>
               {view === "table" && (
                 <label className="flex items-center gap-2 text-sm">
                   <input
@@ -575,25 +657,6 @@ const BucketImport = ({ round }: { round: any }) => {
               )}
             </div>
           </div>
-
-          {showBatch && (
-            <BatchImages
-              rows={prepared.rows.map((r) => ({
-                rowNumber: r.rowNumber,
-                title: r.payload.title,
-                uniqueValue: r.uniqueValue,
-              }))}
-              images={images}
-              unassigned={unassigned}
-              onFiles={onBatchFiles}
-              onAssign={assignUnassigned}
-              onDiscard={(id) =>
-                setUnassigned((us) => us.filter((x) => x.id !== id))
-              }
-              onMove={moveImage}
-              onClear={clearImage}
-            />
-          )}
 
           <div className="flex justify-end">
             <SegmentedToggle<"table" | "list">
@@ -829,6 +892,9 @@ const BucketImport = ({ round }: { round: any }) => {
           totalAsk={totalAsk}
           currency={ctx.currency}
           submitting={submitting}
+          phase={phase}
+          progress={progress}
+          failures={uploadFailures}
           error={submitError}
           onConfirm={submit}
           onCancel={() => setConfirmOpen(false)}

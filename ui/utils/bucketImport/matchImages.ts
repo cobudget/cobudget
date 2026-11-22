@@ -107,6 +107,24 @@ export function matchFiles(
   return result;
 }
 
+/**
+ * Files the name matcher could not place go, in the order given, to the rows
+ * that still have no image (in row order). Returns the pairs and the files
+ * left over when there are more files than free rows.
+ */
+export function placeInOrder(
+  fileIds: string[],
+  freeRows: number[]
+): { placed: { fileId: string; rowNumber: number }[]; leftover: string[] } {
+  const n = Math.min(fileIds.length, freeRows.length);
+  return {
+    placed: fileIds
+      .slice(0, n)
+      .map((fileId, i) => ({ fileId, rowNumber: freeRows[i] })),
+    leftover: fileIds.slice(n),
+  };
+}
+
 /** Runs async tasks with at most `limit` in flight (FIFO). */
 export function createLimiter(limit: number) {
   let active = 0;

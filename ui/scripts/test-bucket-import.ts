@@ -28,6 +28,7 @@ import {
   createLimiter,
   fileStem,
   matchFiles,
+  placeInOrder,
 } from "../utils/bucketImport/matchImages";
 
 // Arbitrary field set (deliberately NOT the Give it a Go fields): the importer
@@ -79,7 +80,7 @@ const issuesOf = (p: Awaited<ReturnType<typeof run>>, row: number) =>
 async function main() {
   const H = "title,summary,ref,area,budget-item-1,budget-amount-1";
 
-  await test("applyImages: upload clears the warning, uploading blocks, error keeps the row", async () => {
+  await test("applyImages: a chosen image clears the warning and previews; uploaded URLs win", async () => {
     const p = await run(`${H}
 A,s,A1,Green Economy,Beds,100
 B,s,B1,Green Economy,Beds,100
@@ -90,38 +91,48 @@ C,s,C1,Green Economy,Beds,100
       assert.ok(issuesOf(p, i).some((x) => x.column === "image"));
       assert.deepEqual(r.payload.images, []);
     });
+    const file = {} as File;
     const a = applyImages(p, {
       1: {
         status: "done",
         fileName: "a.png",
-        attempt: 1,
+        file,
+        previewUrl: "blob:1",
         small: "s1",
         large: "l1",
       },
-      2: {
-        status: "done",
-        fileName: "b.png",
-        attempt: 2,
-        small: "s2",
-        large: "l2",
+      2: { status: "pending", fileName: "b.png", file, previewUrl: "blob:2" },
+      3: {
+        status: "error",
+        fileName: "c.png",
+        file,
+        previewUrl: "blob:3",
+        error: "nope",
       },
-      3: { status: "uploading", fileName: "c.png", attempt: 3 },
     });
     assert.deepEqual(a.rows[0].payload.images, [{ small: "s1", large: "l1" }]);
-    assert.equal(
-      a.rows[0].issues.filter((i) => i.column === "image").length,
-      0
-    );
-    assert.ok(summarize(a).blocked === true); // row 3 still uploading
-    assert.ok(
-      a.rows[2].issues.some((i) => i.message.includes("still uploading"))
-    );
-    const err = applyImages(p, {
-      3: { status: "error", fileName: "c.png", attempt: 1, error: "nope" },
-    });
-    assert.deepEqual(err.rows[2].payload.images, []);
-    assert.ok(err.rows[2].issues.some((i) => i.column === "image"));
+    assert.deepEqual(a.rows[1].payload.images, [
+      { small: "blob:2", large: "blob:2" },
+    ]);
+    // pending and failed uploads do not block: they are (re)tried on submit
+    for (const i of [0, 1, 2])
+      assert.equal(
+        a.rows[i].issues.filter((x) => x.column === "image").length,
+        0
+      );
+    assert.equal(summarize(a).blocked, false);
     assert.equal(p.rows[0].payload.images?.length, 0); // input not mutated
+  });
+
+  await test("placeInOrder: unmatched files fill the free rows in order, extras are left over", () => {
+    const r = placeInOrder(["a", "b", "c"], [2, 5]);
+    assert.deepEqual(r.placed, [
+      { fileId: "a", rowNumber: 2 },
+      { fileId: "b", rowNumber: 5 },
+    ]);
+    assert.deepEqual(r.leftover, ["c"]);
+    assert.deepEqual(placeInOrder([], [1]).placed, []);
+    assert.deepEqual(placeInOrder(["a"], []).leftover, ["a"]);
   });
 
   await test("matchFiles: code, then title slug, then order number; never guesses", () => {
